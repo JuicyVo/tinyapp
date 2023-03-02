@@ -5,8 +5,8 @@ const PORT = 8080
 app.set("view engine", "ejs")
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": "http://www.lighthouselabs.ca"//,
+  // "9sm5xK": "http://www.google.com"
 }
 
 app.get("/urls", (req, res) => {
@@ -15,8 +15,10 @@ app.get("/urls", (req, res) => {
 })
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase};
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+
   res.render("urls_show", templateVars);
+  // console.log (typeof urlDatabase[req.params.id]) //this line failed
 });
 
 app.get("/", (req, res) => {
