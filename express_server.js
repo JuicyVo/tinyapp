@@ -17,7 +17,7 @@ function generateRandomString() {
      //chars.length so it uses all the char options
     randomString += chars.substring (rnum, rnum+1)
   }
-  console.log (randomString)
+  return randomString
 }
 
 
@@ -44,8 +44,9 @@ app.get("/urls/:id", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  generateRandomString()
-  res.send (randomString); // Respond with 'Ok' (we will replace this)
+  shortUrl= generateRandomString()
+  console.log (shortUrl)
+  res.send (shortUrl); // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/", (req, res) => {
