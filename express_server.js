@@ -43,9 +43,12 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+  console.log("Status code:", res.statusCode);
+  let longURL=(req.body.longURL); // Log the POST request body to the console
   shortUrl= generateRandomString()
+  urlDatabase[shortUrl]= longURL
   console.log (shortUrl)
+  console.log (urlDatabase)
   res.send (shortUrl); // Respond with 'Ok' (we will replace this)
 });
 
