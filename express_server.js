@@ -70,6 +70,20 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
+app.post ("/urls/:id/delete", (req, res) => {
+  const id = req.params.id;
+  console.log ("DELETE")
+  delete (urlDatabase[id])
+  console.log (urlDatabase)
+  res.redirect ('/urls')
+})
+
+app.post ("/urls/:id/update", (req, res) => {
+  const id = req.params.id
+  console.log ("Update")
+  res.redirect ('/urls')
+}) 
+
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
