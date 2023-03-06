@@ -87,6 +87,13 @@ app.post ("/urls/:id/update", (req, res) => {
   res.redirect ('/urls')
 }) 
 
+app.post ("/login", (req, res) => {
+  console.log ("login")
+  const username = req.body.username
+  res.cookie ('username', username)
+  res.redirect ('/urls')
+  //console.log (req.body.username)
+})
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
