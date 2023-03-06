@@ -49,7 +49,7 @@ app.post("/urls", (req, res) => {
   let longURL = (req.body.longURL); // Log the POST request body to the console
   shortUrl = generateRandomString();
   urlDatabase[shortUrl] = longURL;
-  console.log(shortUrl);
+  console.log(urlDatabase[longURL]);
   console.log(urlDatabase);
   //res.send (shortUrl); // res.send ends the function, ruining redirect
   res.redirect(`/urls/${shortUrl}`);
@@ -79,8 +79,11 @@ app.post ("/urls/:id/delete", (req, res) => {
 })
 
 app.post ("/urls/:id/update", (req, res) => {
-  const id = req.params.id
-  console.log ("Update")
+  const shortUrl = req.params.id;
+  //const id = req.params.id
+  const newURL = req.body.input
+  urlDatabase[shortUrl] = newURL //changes the LongURL, apparently the assignment is to change longURL not the shortURL
+  console.log (newURL)
   res.redirect ('/urls')
 }) 
 
@@ -92,14 +95,14 @@ app.get("/hello", (req, res) => {
 
 
 
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 
-
-
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
+//todo
+//what if someone updates non existant with id spongebob no existing id

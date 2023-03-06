@@ -21,9 +21,9 @@
           Short URL ID: <a href="/u/ <%= id %>"><%= id %></a>
         </p>
         <h5 class="card-title">Edit</h5>
-        <form method="POST" action="/urls"> <!--New From Bar-->
+        <form method="POST" action="/urls/<%=id%>/update"> <!--New From Bar-->
           <label for="my-input">New Url:</label>
-          <input type="text" id="my-input" name="my-input">
+          <input type="text" id="input" name="input">
           <button type="submit">Submit</button>
         </form>
       </div>
