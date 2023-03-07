@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-var cookieParser = require('cookie-parser')
+let cookieParser = require('cookie-parser');
 
-app.use(cookieParser())
+app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -33,12 +33,13 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   //has to be before app.get urls/;id to work
-  res.render("urls_new");
+  const templateVars = { username: req.cookies["username"], urls: urlDatabase};
+  res.render("urls_new", templateVars);
   
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
 
   res.render("urls_show", templateVars);
   // console.log (typeof urlDatabase[req.params.id]) //this line failed
@@ -71,35 +72,35 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
-app.post ("/urls/:id/delete", (req, res) => {
+app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  console.log ("DELETE")
-  delete (urlDatabase[id])
-  console.log (urlDatabase)
-  res.redirect ('/urls')
-})
+  console.log("DELETE");
+  delete (urlDatabase[id]);
+  console.log(urlDatabase);
+  res.redirect('/urls');
+});
 
-app.post ("/urls/:id/update", (req, res) => {
+app.post("/urls/:id/update", (req, res) => {
   const shortUrl = req.params.id;
   //const id = req.params.id
-  const newURL = req.body.input
-  urlDatabase[shortUrl] = newURL //changes the LongURL, apparently the assignment is to change longURL not the shortURL
-  console.log (newURL)
-  res.redirect ('/urls')
-}) 
+  const newURL = req.body.input;
+  urlDatabase[shortUrl] = newURL; //changes the LongURL, apparently the assignment is to change longURL not the shortURL
+  console.log(newURL);
+  res.redirect('/urls');
+});
 
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
 });
 
-app.post ("/login", (req, res) => {
-  console.log ("login")
-  const username = req.body.username
-  console.log ("New cookie", username)
+app.post("/login", (req, res) => {
+  console.log("login");
+  const username = req.body.username;
+  console.log("New cookie", username);
   res.cookie("username", username);
-  res.redirect ('/urls')
-})
+  res.redirect('/urls');
+});
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
