@@ -88,11 +88,16 @@ app.post ("/urls/:id/update", (req, res) => {
   res.redirect ('/urls')
 }) 
 
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
 app.post ("/login", (req, res) => {
   console.log ("login")
   const username = req.body.username
   console.log ("New cookie", username)
-  res.cookie ('username', username)
+  res.cookie("username", username);
   res.redirect ('/urls')
 })
 
