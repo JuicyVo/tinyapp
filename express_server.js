@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+var cookieParser = require('cookie-parser')
 
+app.use(cookieParser())
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -24,9 +26,8 @@ function generateRandomString() {
 
 app.use(express.urlencoded({ extended: true}));
 
-
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { username: req.cookies["username"], urls: urlDatabase};
   res.render("urls_index", templateVars);
 });
 
@@ -90,9 +91,9 @@ app.post ("/urls/:id/update", (req, res) => {
 app.post ("/login", (req, res) => {
   console.log ("login")
   const username = req.body.username
+  console.log ("New cookie", username)
   res.cookie ('username', username)
   res.redirect ('/urls')
-  //console.log (req.body.username)
 })
 
 app.get("/hello", (req, res) => {
