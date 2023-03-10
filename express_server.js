@@ -40,19 +40,28 @@ function generateRandomString() {
 app.use(express.urlencoded({ extended: true}));
 
 app.get("/urls", (req, res) => {
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase};
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   //has to be before app.get urls/;id to work
-  const templateVars = { username: req.cookies["username"], urls: urlDatabase};
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_new", templateVars);
   
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
+  const templateVars = { id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    user: users[req.cookies["user_id"]]
+  };
 
   res.render("urls_show", templateVars);
   // console.log (typeof urlDatabase[req.params.id]) //this line failed
@@ -77,27 +86,49 @@ app.get("/", (req, res) => {
 
 
 app.get("/register", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
-  console.log ("registery page")
-  res.render ("urls_register", templateVars)
+  const templateVars = { id: req.params.id, 
+    longURL: urlDatabase[req.params.id], 
+    user: users[req.cookies["user_id"]]};
+  res.render("urls_register", templateVars);
+});
+
+app.get("/login", (req,res) => {
+  const templateVars = { id: req.params.id, 
+  longURL: urlDatabase[req.params.id], 
+  user: req.cookies["user"]};
+  res.render("urls_login", templateVars);
 })
 
-app.post ("/register", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
-  let email = (req.body.email)
-  let password = (req.body.password)
-  let userid = generateRandomString()
+app.post("/register", (req, res) => {
+  const templateVars = { id: req.params.id, 
+  longURL: urlDatabase[req.params.id], 
+  user: req.cookies["user"]};
+  let email = (req.body.email);
+  let password = (req.body.password);
+  let userid = generateRandomString();
+  let userExist = false
+
+  for (let existingUser in users) {
+    if (users[existingUser].email === email) { 
+      userExist = true
+      res.status(400).send ("Email already exists")
+      return
+    } 
+  }
 
   const newUser = {
     id: userid,
     email: email,
     password: password
+  };
+  users[userid] = newUser; //changes name of user into the user id
+  if (!email || !password) {
+    res.status(400).send ("Missing email or password field")
+    return
   }
-  users[userid] = newUser //changes name of user into the user id
-  //console.log (users)
-  res.cookie ("userId", userid)
-  res.redirect ("/urls")
-})
+  res.cookie("user_id", userid);
+  res.redirect("/urls");
+});
 
 app.get("/u/:id", (req, res) => {
   const shortUrl = req.params.id;
@@ -128,7 +159,7 @@ app.post("/urls/:id/update", (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
