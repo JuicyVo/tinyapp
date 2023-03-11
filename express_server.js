@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 let cookieParser = require('cookie-parser');
+const e = require("express");
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -23,6 +24,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  williamtvietId: {
+    id: "williamtvietId",
+    email: "williamtviet@hotmail.com",
+    password: "password"
+  }
 };
 
 function generateRandomString() {
@@ -83,8 +89,6 @@ app.get("/", (req, res) => {
   res.send("Hello");
 });
 
-
-
 app.get("/register", (req, res) => {
   const templateVars = { id: req.params.id, 
     longURL: urlDatabase[req.params.id], 
@@ -97,6 +101,7 @@ app.get("/login", (req,res) => {
   longURL: urlDatabase[req.params.id], 
   user: req.cookies["user"]};
   res.render("urls_login", templateVars);
+  
 })
 
 app.post("/register", (req, res) => {
@@ -165,10 +170,32 @@ app.post('/logout', (req, res) => {
 
 app.post("/login", (req, res) => {
   console.log("login");
-  const username = req.body.username;
-  console.log("New cookie", username);
-  res.cookie("username", username);
-  res.redirect('/urls');
+  let userExist = false;
+  const email = req.body.email;
+  const password = req.body.password;
+  
+  for (let existingUser in users) {
+    if (users[existingUser].email === email) { 
+      userExist = true;
+      if (users[existingUser].password === password) {
+        console.log("Password matches"); 
+        res.cookie ("user_id", users[existingUser].id)
+        console.log (users[existingUser].id)
+        res.redirect ("/urls")
+      } else {
+        console.log("Password doesn't match");
+      }
+    }
+  }
+  
+  //console.log(userExist);
+  
+  if (!userExist) {
+    res.status(403).send("Email not found");
+    console.log("email not found");
+  } 
+  //res.cookie("username", username);
+  //res.redirect('/urls');
 });
 
 app.get("/hello", (req, res) => {
