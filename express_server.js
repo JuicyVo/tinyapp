@@ -131,7 +131,7 @@ app.post("/register", (req, res) => {
     res.status(400).send ("Missing email or password field")
     return
   }
-  res.cookie("user_id", userid);
+  res.cookie("user_id", userid);F
   res.redirect("/urls");
 });
 
@@ -165,7 +165,7 @@ app.post("/urls/:id/update", (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.post("/login", (req, res) => {
@@ -184,6 +184,7 @@ app.post("/login", (req, res) => {
         res.redirect ("/urls")
       } else {
         console.log("Password doesn't match");
+        res.status(403).send ("Password doesn't match")
       }
     }
   }
