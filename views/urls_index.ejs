@@ -31,8 +31,8 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %> 
-              <td><%= urls[id] %></td>
-              <form method="GET" action ="/urls/<%=id %>"> <td> 
+              <td><%=urls[id].longURL%></td>
+              <form method="get" action ="/urls/<%=id%>"> <td> 
                 <button type = "submit" class = "btn btn-primary">Edit</button>
                   </td></form>
               <form method="POST" action="/urls/<%= id %>/delete">  <!-- <%= %> for the id is like  ${} syntax-->

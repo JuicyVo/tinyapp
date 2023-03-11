@@ -8,9 +8,14 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "www.lighthouselabs.ca/", //removed http as it conflicts with my/u:id solution
-        
-  "9sm5xK": "www.google.com/"
+  b6UTxa: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
@@ -24,10 +29,10 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
-  williamtvietId: {
-    id: "williamtvietId",
+  b6UTxa: {
+    id: "b6UTxa",
     email: "williamtviet@hotmail.com",
-    password: "password"
+    password: "asd"
   }
 };
 
@@ -68,7 +73,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies["user_id"]]
   };
 
@@ -147,13 +152,12 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const shortUrl = req.params.id;
-  const longUrl = urlDatabase[shortUrl];
-  console.log(shortUrl + longUrl);
+  const id = req.params.id;
+  let longUrl = urlDatabase[id].longURL; //urlDatabase[id] && 
   if (longUrl) {
-    res.redirect(`http://${longUrl}`);
+    res.redirect(longUrl);
   } else {
-    res.status(404).send("URL not found, request URL not found");
+    res.status(404).send("URL not found");
   }
 });
 
