@@ -54,13 +54,16 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  //has to be before app.get urls/;id to work
+  const user = users[req.cookies["user_id"]];
+  if (!user) {
+    res.redirect("/login");
+    return;
+  }
   const templateVars = {
     urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    user
   };
   res.render("urls_new", templateVars);
-  
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -75,13 +78,14 @@ app.get("/urls/:id", (req, res) => {
 
 
 app.post("/urls", (req, res) => {
-  console.log("Status code:", res.statusCode);
-  let longURL = (req.body.longURL); // Log the POST request body to the console
-  shortUrl = generateRandomString();
+  const user = users[req.cookies["user_id"]];
+  if (!user) {
+    res.status(401).send("You must be logged in to shorten URLs.");
+    return;
+  }
+  const longURL = req.body.longURL;
+  const shortUrl = generateRandomString();
   urlDatabase[shortUrl] = longURL;
-  console.log(urlDatabase[longURL]);
-  console.log(urlDatabase);
-  //res.send (shortUrl); // res.send ends the function, ruining redirect
   res.redirect(`/urls/${shortUrl}`);
 });
 
@@ -90,19 +94,26 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { id: req.params.id, 
-    longURL: urlDatabase[req.params.id], 
-    user: users[req.cookies["user_id"]]};
-  res.render("urls_register", templateVars);
+  if (req.cookies.user_id) { // check if user is logged in
+    res.redirect("/urls");
+  } else {
+    const templateVars = {
+      user: users[req.cookies.user_id]
+    };
+    res.render("urls_register", templateVars);
+  }
 });
 
 app.get("/login", (req,res) => {
-  const templateVars = { id: req.params.id, 
-  longURL: urlDatabase[req.params.id], 
-  user: req.cookies["user"]};
-  res.render("urls_login", templateVars);
-  
-})
+  if (req.cookies.user_id) { // check if user is logged in
+    res.redirect("/urls");
+  } else {
+    const templateVars = {
+      user: users[req.cookies.user_id]
+    };
+    res.render("urls_login", templateVars);
+  }
+});
 
 app.post("/register", (req, res) => {
   const templateVars = { id: req.params.id, 
@@ -131,7 +142,7 @@ app.post("/register", (req, res) => {
     res.status(400).send ("Missing email or password field")
     return
   }
-  res.cookie("user_id", userid);F
+  res.cookie("user_id", userid);
   res.redirect("/urls");
 });
 
@@ -142,7 +153,7 @@ app.get("/u/:id", (req, res) => {
   if (longUrl) {
     res.redirect(`http://${longUrl}`);
   } else {
-    res.status(404).send("URL not found");
+    res.status(404).send("URL not found, request URL not found");
   }
 });
 
@@ -169,34 +180,29 @@ app.post('/logout', (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("login");
-  let userExist = false;
   const email = req.body.email;
   const password = req.body.password;
-  
-  for (let existingUser in users) {
-    if (users[existingUser].email === email) { 
-      userExist = true;
-      if (users[existingUser].password === password) {
-        console.log("Password matches"); 
-        res.cookie ("user_id", users[existingUser].id)
-        console.log (users[existingUser].id)
-        res.redirect ("/urls")
-      } else {
-        console.log("Password doesn't match");
-        res.status(403).send ("Password doesn't match")
-      }
+
+  // check if user with given email exists
+  let user = null;
+  for (let userId in users) {
+    if (users[userId].email === email) {
+      user = users[userId];
+      break;
     }
   }
-  
-  //console.log(userExist);
-  
-  if (!userExist) {
-    res.status(403).send("Email not found");
-    console.log("email not found");
-  } 
-  //res.cookie("username", username);
-  //res.redirect('/urls');
+  if (!user) {
+    return res.status(403).send("User not found");
+  }
+
+  // check if password matches
+  if (user.password !== password) {
+    return res.status(403).send("Password incorrect");
+  }
+
+  // set user_id cookie and redirect to /urls
+  res.cookie("user_id", user.id);
+  res.redirect("/urls");
 });
 
 app.get("/hello", (req, res) => {
