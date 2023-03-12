@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 let cookieParser = require('cookie-parser');
 const e = require("express");
+const bcrypt = require ("bcryptjs")
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -18,7 +19,7 @@ const urlDatabase = {
   },
 };
 
-const users = {
+const users = { //placeholders should not be used
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -29,11 +30,6 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
-  b6UTxa: {
-    id: "b6UTxa",
-    email: "williamtviet@hotmail.com",
-    password: "asd"
-  }
 };
 
 function generateRandomString() {
@@ -47,15 +43,37 @@ function generateRandomString() {
   return randomString;
 }
 
+function urlsForUser(id) {
+  const urls = [];
+  for (const shortURL in urlDatabase) {
+    const url = urlDatabase[shortURL];
+    if (url.userID === id) {
+      urls.push({ shortURL, longURL: url.longURL });
+    }
+  }
+  console.log (urls)
+  return urls;
+}
 
 app.use(express.urlencoded({ extended: true}));
 
 app.get("/urls", (req, res) => {
+  const user = users[req.cookies["user_id"]]
   const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
+  let userUrls = urlsForUser(user.id)
+  
+  console.log (templateVars.urls)
+  console.log ("bye")
+  console.log (userUrls)
+  if (user) {
+    templateVars.urls = userUrls //ASK for help tommoow, it messes up on new URLS
   res.render("urls_index", templateVars);
+} else {
+  res.send ("You need to login first to see the urls")
+}
 });
 
 app.get("/urls/new", (req, res) => {
@@ -89,9 +107,12 @@ app.post("/urls", (req, res) => {
     return;
   }
   const longURL = req.body.longURL;
-  const shortUrl = generateRandomString();
-  urlDatabase[shortUrl] = longURL;
-  res.redirect(`/urls/${shortUrl}`);
+  const id = generateRandomString();
+  urlDatabase[id] = {
+    longURL: longURL,
+    userID: user.id
+  };
+  res.redirect(`/urls/${id}`);
 });
 
 app.get("/", (req, res) => {
@@ -125,7 +146,8 @@ app.post("/register", (req, res) => {
   longURL: urlDatabase[req.params.id], 
   user: req.cookies["user"]};
   let email = (req.body.email);
-  let password = (req.body.password);
+  let tempPassword = (req.body.password)
+  let password = (bcrypt.hashSync(tempPassword, 10));
   let userid = generateRandomString();
   let userExist = false
 
@@ -153,12 +175,14 @@ app.post("/register", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  let longUrl = urlDatabase[id].longURL; //urlDatabase[id] && 
-  if (longUrl) {
-    res.redirect(longUrl);
-  } else {
-    res.status(404).send("URL not found");
-  }
+
+  let longUrl = urlDatabase[id].longURL; //FIX THIS today, its not working on newly made links
+  res.redirect(longUrl);
+  // if (longUrl) {
+  //   res.redirect(longUrl);
+  // } else {
+  //   res.status(404).send("URL not found");
+  // }
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -200,8 +224,9 @@ app.post("/login", (req, res) => {
   }
 
   // check if password matches
-  if (user.password !== password) {
-    return res.status(403).send("Password incorrect");
+  if (!bcrypt.compareSync(password, user.password)) {
+    res.status(403).send("Invalid email or password");
+    return;
   }
 
   // set user_id cookie and redirect to /urls
