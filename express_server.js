@@ -2,17 +2,18 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 let cookieParser = require('cookie-parser');
-let cookieSession = require ('cookie-session')
+let cookieSession = require('cookie-session');
 const e = require("express");
-const bcrypt = require ("bcryptjs")
+const bcrypt = require("bcryptjs");
+//const getUserByEmail = require("./getUserByEmail"); //some reason crashes the code so I'll ignore it as I need to work on next weeks work
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
-app.use (cookieSession({
+app.use(cookieSession({
   name: 'session',
   keys: ["user_id"]
-}))
+}));
 
 const urlDatabase = {
   b6UTxa: {
@@ -38,6 +39,7 @@ const users = { //placeholders should not be used
   },
 };
 
+
 function generateRandomString() {
   let randomString = "";
   let chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
@@ -57,26 +59,26 @@ function urlsForUser(id) {
       urls.push({ shortURL, longURL: url.longURL, id });
     }
   }
-  console.log (urls)
+  console.log(urls);
   return urls;
 }
 
 app.use(express.urlencoded({ extended: true}));
 
 app.get("/urls", (req, res) => {
-  const user = users[req.session.user_id]
-  if(!user) {
-    res.send ("You need to login first to see the urls")
+  const user = users[req.session.user_id];
+  if (!user) {
+    res.send("You need to login first to see the urls");
   }
   const templateVars = {
     urls: urlDatabase,
     user: users[req.session.user_id]
   };
-  let userUrls = urlsForUser(user.id)
+  let userUrls = urlsForUser(user.id);
   
   if (user) {
-    templateVars.urls = userUrls 
-  } 
+    templateVars.urls = userUrls;
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -94,8 +96,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  console.log ("97", req.params)
-  console.log ("98", urlDatabase)
+  console.log("97", req.params);
+  console.log("98", urlDatabase);
   const templateVars = { id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
     user: users[req.session.user_id]
@@ -148,21 +150,21 @@ app.get("/login", (req,res) => {
 });
 
 app.post("/register", (req, res) => {
-  const templateVars = { id: req.params.id, 
-  longURL: urlDatabase[req.params.id], 
-  user: req.cookies["user"]};
+  const templateVars = { id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    user: req.cookies["user"]};
   let email = (req.body.email);
-  let tempPassword = (req.body.password)
+  let tempPassword = (req.body.password);
   let password = (bcrypt.hashSync(tempPassword, 10));
   let userid = generateRandomString();
-  let userExist = false
+  let userExist = false;
 
   for (let existingUser in users) {
-    if (users[existingUser].email === email) { 
-      userExist = true
-      res.status(400).send ("Email already exists")
-      return
-    } 
+    if (users[existingUser].email === email) {
+      userExist = true;
+      res.status(400).send("Email already exists");
+      return;
+    }
   }
 
   const newUser = {
@@ -172,11 +174,11 @@ app.post("/register", (req, res) => {
   };
   users[userid] = newUser; //changes name of user into the user id
   if (!email || !password) {
-    res.status(400).send ("Missing email or password field")
-    return
+    res.status(400).send("Missing email or password field");
+    return;
   }
   // res.cookie("user_id", userid);
-  req.session.user_id = userid
+  req.session.user_id = userid;
   res.redirect("/urls");
 });
 
@@ -275,6 +277,6 @@ app.listen(PORT, () => {
 
 
 
-//things to fix 
+//things to fix
 //short URL and long url on newly made sites no longer work
 //install cookie session without breaking my code
