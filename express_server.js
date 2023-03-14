@@ -194,8 +194,19 @@ app.get("/u/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  console.log("DELETE");
-  delete (urlDatabase[id]);
+
+  if (!urlDatabase[id]) {
+    return res.status(404).send("URL not found");
+  }
+
+  if (!req.session.user_id) {
+    return res.status(401).send("You must be logged in to delete a URL");
+  }
+
+  if (urlDatabase[id].userID !== req.session.user_id) {
+    return res.status(403).send("You do not have permission to delete this URL");
+  }
+  delete urlDatabase[id];
   console.log(urlDatabase);
   res.redirect('/urls');
 });
@@ -203,10 +214,16 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id/update", (req, res) => {
   const shortUrl = req.params.id;
   //const id = req.params.id
-  const newURL = req.body.input;
-  urlDatabase[shortUrl] = newURL; //changes the LongURL, apparently the assignment is to change longURL not the shortURL
-  console.log(newURL);
-  res.redirect('/urls');
+  if (!urlDatabase[shortUrl]) {
+    res.status(404).send("The URL was not found");
+  } else if (!req.session.userId) {
+    res.status(401).send("You must be logged in to update the URL");
+  } else if (urlDatabase[shortUrl].userId !== req.session.userId) {
+    res.status(403).send("You are not authorized to update this URL");
+  } else {
+    urlDatabase[shortUrl].longURL = newURL;
+    res.redirect('/urls');
+  }
 });
 
 app.post('/logout', (req, res) => {
