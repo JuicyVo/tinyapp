@@ -28,14 +28,15 @@
           </tr>
         </thead>
         <tbody>
-          <% for (let id in urls) { %>
+    
+          <% for (let item of urls) { %>
             <tr>
-              <td><%= id %> 
-              <td><%=urls[id].longURL%></td>
-              <form method="get" action ="/urls/<%=id%>"> <td> 
+              <td><%= item.shortURL %> 
+              <td><%=item.longURL%></td>
+              <form method="get" action ="/urls/<%=item.shortURL%>"> <td> 
                 <button type = "submit" class = "btn btn-primary">Edit</button>
                   </td></form>
-              <form method="POST" action="/urls/<%= id %>/delete">  <!-- <%= %> for the id is like  ${} syntax-->
+              <form method="POST" action="/urls/<%= item.shortURL %>/delete">  <!-- <%= %> for the id is like  ${} syntax-->
               <td><button type="submit" class="btn btn-primary">Delete</button></td>  
             </form> 
             </tr>
